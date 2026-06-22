@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SolarML Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+/* ══ DESIGN TOKENS ══════════════════════════════════════════════════════════ */
+:root[data-theme="light"]{
+  --bg:#f0f4f8;
+  --surface:#ffffff;
+  --card:#ffffff;
+  --card2:#f8fafc;
+  --border:#e2e8f0;
+  --border2:#dde3ef;
+  --text:#0f172a;
+  --text2:#1e293b;
+  --sub:#475569;
+  --muted:#94a3b8;
+  --accent:#f59e0b;
+  --accent2:#fb923c;
+  --blue:#6366f1;
+  --green:#10b981;
+  --purple:#8b5cf6;
+  --red:#ef4444;
+  --nav-bg:#ffffff;
+  --nav-border:#e2e8f0;
+  --sidebar-bg:#ffffff;
+  --input-bg:#f8fafc;
+  --input-border:#dde3ef;
+  --shadow-sm:0 1px 3px rgba(15,23,42,0.08),0 1px 2px rgba(15,23,42,0.04);
+  --shadow:0 4px 16px rgba(15,23,42,0.08),0 2px 6px rgba(15,23,42,0.04);
+  --shadow-lg:0 16px 48px rgba(15,23,42,0.12),0 4px 16px rgba(15,23,42,0.06);
+  --glow:rgba(245,158,11,0.15);
+  --pill-bg:#fff7ed;
+  --pill-text:#b45309;
+}
+:root[data-theme="dark"]{
+  --bg:#060d1a;
+  --surface:#0c1524;
+  --card:#111e30;
+  --card2:#0e1929;
+  --border:#1c2d42;
+  --border2:#243447;
+  --text:#f1f5f9;
+  --text2:#e2e8f0;
+  --sub:#94a3b8;
+  --muted:#475569;
+  --accent:#f59e0b;
+  --accent2:#fb923c;
+  --blue:#818cf8;
+  --green:#34d399;
+  --purple:#a78bfa;
+  --red:#f87171;
+  --nav-bg:#0c1524;
+  --nav-border:#1c2d42;
+  --sidebar-bg:#0c1524;
+  --input-bg:#0a1525;
+  --input-border:#1c2d42;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.3);
+  --shadow:0 4px 16px rgba(0,0,0,0.35);
+  --shadow-lg:0 16px 48px rgba(0,0,0,0.5);
+  --glow:rgba(245,158,11,0.12);
+  --pill-bg:rgba(245,158,11,0.12);
+  --pill-text:#fbbf24;
+}
+
+/* ══ RESET & BASE ═══════════════════════════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;transition:background 0.3s,color 0.3s;
+  overflow-x:hidden;
+}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:8px;}
+::-webkit-scrollbar-thumb:hover{background:var(--muted);}
+
+/* ══ LAYOUT ═════════════════════════════════════════════════════════════════ */
+.layout{display:flex;min-height:100vh;}
+.sidebar{
+  width:240px;flex-shrink:0;
+  background:var(--sidebar-bg);
+  border-right:1px solid var(--nav-border);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;height:100vh;
+  z-index:200;transition:transform 0.3s,background 0.3s;
+}
+.main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+
+/* ══ SIDEBAR ════════════════════════════════════════════════════════════════ */
+.sidebar-logo{
+  padding:24px 20px 20px;
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--nav-border);
+}
+.logo-mark{
+  width:36px;height:36px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+  box-shadow:0 4px 14px var(--glow);
+}
+.logo-name{
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:800;
+  color:var(--text);letter-spacing:-0.3px;
+}
+.logo-name span{color:var(--accent);}
+
+.sidebar-user{
+  margin:16px 12px;
+  padding:12px;
+  background:var(--card2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  display:flex;align-items:center;gap:10px;
+}
+.user-avatar{
+  width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),var(--blue));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;color:#fff;flex-shrink:0;
+}
+.user-name{font-size:13px;font-weight:700;color:var(--text);}
+.user-role{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;}
+
+.nav-section{padding:16px 12px 8px;}
+.nav-label{
+  font-size:10px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:1px;
+  padding:0 8px;margin-bottom:6px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:10px;
+  font-size:13px;font-weight:600;color:var(--sub);
+  cursor:pointer;transition:all 0.18s;
+  margin-bottom:2px;border:1px solid transparent;
+}
+.nav-item:hover{background:var(--card2);color:var(--text);}
+.nav-item.active{
+  background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(251,146,60,0.06));
+  color:var(--accent);border-color:rgba(245,158,11,0.2);
+}
+.nav-item .nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.nav-badge{
+  margin-left:auto;font-size:10px;padding:2px 7px;
+  border-radius:20px;font-weight:700;
+  background:var(--pill-bg);color:var(--pill-text);
+}
+
+.sidebar-footer{margin-top:auto;padding:16px 12px;}
+.theme-btn{
+  width:100%;display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:10px;
+  background:var(--card2);border:1px solid var(--border);
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:13px;font-weight:600;color:var(--sub);
+  cursor:pointer;transition:all 0.2s;
+}
+.theme-btn:hover{border-color:var(--accent);color:var(--accent);}
+.logout-btn{
+  width:100%;display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:10px;
+  background:none;border:none;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:13px;font-weight:600;color:var(--muted);
+  cursor:pointer;transition:all 0.2s;margin-top:6px;
+}
+.logout-btn:hover{color:var(--red);}
+
+/* ══ TOPBAR ══════════════════════════════════════════════════════════════════ */
+.topbar{
+  padding:18px 32px;
+  background:var(--surface);
+  border-bottom:1px solid var(--nav-border);
+  display:flex;align-items:center;gap:16px;
+  box-shadow:var(--shadow-sm);
+  position:sticky;top:0;z-index:100;
+  transition:background 0.3s;
+}
+.page-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--text);letter-spacing:-0.3px;}
+.page-sub{font-size:12px;color:var(--muted);margin-top:1px;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.trained-pill{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 14px;border-radius:20px;
+  background:var(--pill-bg);
+  font-size:12px;font-weight:700;color:var(--pill-text);
+  border:1px solid rgba(245,158,11,0.2);
+}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);}
+.status-dot.on{background:var(--green);box-shadow:0 0 6px var(--green);}
+
+/* ══ PAGE CONTENT ═══════════════════════════════════════════════════════════ */
+.page{display:none;padding:28px 32px 60px;animation:fadein 0.3s ease;}
+.page.active{display:block;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* ══ CARDS ═══════════════════════════════════════════════════════════════════ */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:24px;
+  box-shadow:var(--shadow-sm);
+  transition:background 0.3s,border-color 0.3s;
+}
+.card-title{
+  font-size:15px;font-weight:700;color:var(--text);
+  margin-bottom:16px;display:flex;align-items:center;gap:8px;
+}
+.card-title .ct-icon{
+  width:30px;height:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;
+}
+
+/* ══ GRID ════════════════════════════════════════════════════════════════════ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+@media(max-width:1100px){.g4{grid-template-columns:repeat(2,1fr);}.g5{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:860px){.g2,.g3{grid-template-columns:1fr;}.sidebar{transform:translateX(-240px);}.main{margin-left:0;}}
+
+/* ══ STAT CARDS ══════════════════════════════════════════════════════════════ */
+.stat-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:20px;
+  box-shadow:var(--shadow-sm);
+  transition:all 0.2s;
+}
+.stat-card:hover{box-shadow:var(--shadow);transform:translateY(-2px);}
+.stat-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
+.stat-icon{
+  width:40px;height:40px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.stat-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;}
+.stat-val{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:500;color:var(--text);line-height:1;}
+.stat-unit{font-size:11px;color:var(--muted);margin-top:4px;}
+
+/* ══ FORMS ════════════════════════════════════════════════════════════════════ */
+.field{margin-bottom:18px;}
+.field label{
+  display:block;font-size:11px;font-weight:700;color:var(--sub);
+  text-transform:uppercase;letter-spacing:0.7px;margin-bottom:7px;
+}
+.input-wrap{position:relative;}
+.input-wrap .fi{
+  position:absolute;left:13px;top:50%;transform:translateY(-50%);
+  font-size:15px;pointer-events:none;
+}
+.input-wrap input[type=number],
+.input-wrap input[type=text],
+.fw-input{
+  width:100%;
+  background:var(--input-bg);border:1.5px solid var(--input-border);
+  border-radius:11px;padding:12px 13px 12px 40px;
+  font-family:'JetBrains Mono',monospace;font-size:14px;
+  color:var(--text);transition:all 0.2s;
+}
+.fw-input{padding:12px 13px;}
+.input-wrap input:focus,.fw-input:focus{
+  outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--glow);background:var(--card);
+}
+input::placeholder{color:var(--muted);}
+
+.range-row{display:flex;align-items:center;gap:10px;margin-top:6px;}
+input[type=range]{
+  flex:1;height:5px;cursor:pointer;accent-color:var(--accent);
+  background:var(--border2);border-radius:4px;border:none;padding:0;
+}
+.range-val{
+  min-width:60px;text-align:right;
+  font-family:'JetBrains Mono',monospace;font-size:13px;
+  color:var(--accent);font-weight:500;
+}
+select.fw-input{cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;
+}
+
+/* ══ BUTTONS ════════════════════════════════════════════════════════════════ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px 22px;border-radius:12px;border:none;cursor:pointer;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;
+  transition:all 0.2s;white-space:nowrap;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#000;box-shadow:0 4px 16px var(--glow);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--glow);}
+.btn-ghost{
+  background:var(--card2);border:1px solid var(--border2);color:var(--sub);
+}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn:disabled{opacity:0.45;cursor:not-allowed;transform:none!important;}
+.btn-sm{padding:8px 16px;font-size:12px;border-radius:9px;}
+.btn-icon{width:36px;height:36px;padding:0;border-radius:9px;}
+.btn-full{width:100%;}
+
+/* ══ MODEL CARDS ════════════════════════════════════════════════════════════ */
+.model-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+@media(max-width:1000px){.model-grid{grid-template-columns:repeat(3,1fr);}}
+.model-card{
+  background:var(--card);border:2px solid var(--border);
+  border-radius:16px;padding:16px 14px;text-align:center;
+  transition:all 0.22s;cursor:pointer;
+}
+.model-card:hover,.model-card.active{
+  box-shadow:0 0 0 2px var(--mc),0 8px 20px rgba(0,0,0,0.1);
+  border-color:var(--mc);transform:translateY(-2px);
+}
+.mc-name{font-size:13px;font-weight:800;margin-bottom:4px;}
+.mc-tag{
+  display:inline-block;font-size:10px;padding:2px 8px;
+  border-radius:20px;font-family:'JetBrains Mono',monospace;
+  margin-bottom:10px;background:var(--mc-bg);color:var(--mc);
+}
+.mc-metrics{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
+.mc-row{display:flex;justify-content:space-between;padding:2px 0;}
+.mc-val{color:var(--text);font-weight:500;}
+
+/* ══ RESULTS CHARTS ════════════════════════════════════════════════════════ */
+.chart-block{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:20px;padding:20px;margin-bottom:20px;
+  box-shadow:var(--shadow-sm);
+  min-width:0;overflow:hidden;
+}
+.chart-label{font-size:12px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:0.7px;margin-bottom:14px;}
+.chart-img{width:100%;border-radius:10px;display:block;}
+.canvas-wrap{position:relative;width:100%;overflow:hidden;}
+
+/* ══ TABLE ══════════════════════════════════════════════════════════════════ */
+.tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{
+  text-align:left;padding:11px 14px;
+  border-bottom:1px solid var(--border);
+  color:var(--muted);font-weight:700;font-size:10px;
+  text-transform:uppercase;letter-spacing:0.7px;
+  background:var(--card2);
+}
+td{
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--sub);
+}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--card2);color:var(--text);}
+
+/* ══ UPLOAD ZONE ════════════════════════════════════════════════════════════ */
+.upload-zone{
+  border:2px dashed var(--border2);border-radius:16px;
+  padding:40px 24px;text-align:center;cursor:pointer;
+  transition:all 0.25s;position:relative;
+}
+.upload-zone:hover,.upload-zone.drag-over{
+  border-color:var(--accent);background:var(--glow);
+}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.uz-icon{font-size:36px;margin-bottom:10px;}
+.uz-title{font-size:15px;font-weight:700;margin-bottom:4px;}
+.uz-sub{font-size:12px;color:var(--muted);}
+
+/* ══ PREDICT RESULT ═════════════════════════════════════════════════════════ */
+.pred-spinner{
+  width:44px;height:44px;border-radius:50%;
+  border:3px solid var(--border2);
+  border-top-color:var(--accent);
+  animation:spin 0.7s linear infinite;
+}
+.pred-hero{
+  text-align:center;padding:36px 24px;
+  background:linear-gradient(135deg,rgba(245,158,11,0.06),rgba(99,102,241,0.04));
+  border-radius:16px;border:1px solid rgba(245,158,11,0.15);
+  margin-bottom:16px;
+}
+.pred-num{
+  font-family:'Syne',sans-serif;font-size:56px;font-weight:800;
+  color:var(--accent);line-height:1;
+  filter:drop-shadow(0 0 24px rgba(245,158,11,0.25));
+}
+.pred-unit{font-size:15px;color:var(--muted);margin-top:8px;}
+.pred-tag{
+  display:inline-block;margin-top:12px;padding:4px 14px;
+  border-radius:20px;font-size:11px;font-weight:700;
+  font-family:'JetBrains Mono',monospace;
+  background:var(--pill-bg);color:var(--pill-text);
+}
+
+/* ══ ALL-MODEL BARS ════════════════════════════════════════════════════════ */
+.model-pred-row{margin-bottom:14px;}
+.mpr-top{display:flex;justify-content:space-between;margin-bottom:5px;}
+.mpr-name{font-size:13px;font-weight:700;}
+.mpr-val{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);}
+.mpr-bar{height:6px;background:var(--border2);border-radius:6px;overflow:hidden;}
+.mpr-fill{height:100%;border-radius:6px;transition:width 0.7s cubic-bezier(0.16,1,0.3,1);}
+
+/* ══ PROGRESS ═══════════════════════════════════════════════════════════════ */
+.progress-bar{height:4px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));
+  border-radius:4px;transition:width 0.4s;width:0%;}
+
+/* ══ TOAST ══════════════════════════════════════════════════════════════════ */
+.toast{
+  position:fixed;bottom:28px;right:28px;z-index:9999;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:14px 18px;
+  font-size:13px;font-weight:600;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:var(--shadow-lg);
+  transform:translateY(70px);opacity:0;pointer-events:none;
+  transition:all 0.3s cubic-bezier(0.16,1,0.3,1);
+  max-width:320px;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{border-color:var(--green);}
+.toast.err{border-color:var(--red);}
+
+/* ══ LOADING OVERLAY ═══════════════════════════════════════════════════════ */
+.overlay{
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:rgba(6,13,26,0.6);backdrop-filter:blur(8px);
+  flex-direction:column;align-items:center;justify-content:center;gap:16px;
+}
+[data-theme="light"] .overlay{background:rgba(240,244,248,0.75);}
+.overlay.show{display:flex;}
+.spinner-ring{
+  width:54px;height:54px;border-radius:50%;
+  border:3px solid var(--border2);border-top-color:var(--accent);
+  animation:spin 0.75s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.ov-title{font-size:16px;font-weight:700;color:var(--text);}
+.ov-sub{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+
+/* ══ COL TAGS ═══════════════════════════════════════════════════════════════ */
+.col-tag{
+  display:inline-block;padding:2px 9px;border-radius:6px;margin:2px;
+  font-size:11px;font-family:'JetBrains Mono',monospace;
+  background:rgba(99,102,241,0.1);color:var(--blue);
+}
+.col-tag.target{background:rgba(16,185,129,0.1);color:var(--green);}
+
+/* ══ EMPTY STATES ═══════════════════════════════════════════════════════════ */
+.empty{text-align:center;padding:60px 24px;color:var(--muted);}
+.empty-icon{font-size:48px;margin-bottom:14px;opacity:0.4;}
+.empty p{font-size:14px;line-height:1.6;}
+
+/* ══ SECTION DIVIDER ════════════════════════════════════════════════════════ */
+.divider{height:1px;background:var(--border);margin:24px 0;}
+.section-label{
+  font-size:11px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;
+}
+</style>
+</head>
+<body>
+
+<!-- ════ LOADING OVERLAY ════ -->
+<div class="overlay" id="overlay">
+  <div class="spinner-ring"></div>
+  <div class="ov-title" id="ovTitle">Processing…</div>
+  <div class="ov-sub" id="ovSub"></div>
+</div>
+
+<!-- ════ TOAST ════ -->
+<div class="toast" id="toast"></div>
+
+<div class="layout">
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">☀️</div>
+    <div class="logo-name">Solar<span>ML</span></div>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="user-avatar" id="userAvatar">?</div>
+    <div>
+      <div class="user-name" id="userName">{{ user }}</div>
+      <div class="user-role">Analyst</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Workspace</div>
+    <div class="nav-item active" id="nav-data" onclick="showPage('data')">
+      <span class="nav-icon">📂</span> Dataset
+    </div>
+    <div class="nav-item" id="nav-train" onclick="showPage('train')">
+      <span class="nav-icon">🧠</span> Train Models
+    </div>
+    <div class="nav-item" id="nav-results" onclick="showPage('results')">
+      <span class="nav-icon">📊</span> Results
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Prediction</div>
+    <div class="nav-item" id="nav-predict" onclick="showPage('predict')">
+      <span class="nav-icon">⚡</span> Manual Input
+      <span class="nav-badge">Primary</span>
+    </div>
+    <div class="nav-item" id="nav-batch" onclick="showPage('batch')">
+      <span class="nav-icon">📋</span> Batch CSV
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <button class="theme-btn" onclick="toggleTheme()">
+      <span id="themeIcon">🌙</span>
+      <span id="themeLabel">Dark Mode</span>
+    </button>
+    <button class="logout-btn" onclick="window.location.href='/logout'">
+      <span>🚪</span> Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- ════ MAIN ════ -->
+<div class="main">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <div class="page-title" id="pageTitle">Dataset</div>
+      <div class="page-sub" id="pageSub">Upload or generate training data</div>
+    </div>
+    <div class="topbar-right">
+      <div class="trained-pill" id="modelPill">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">No model trained</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ PAGE: DATASET ════ -->
+  <div class="page active" id="page-data">
+
+    <!-- Top row: upload card + summary row card side by side -->
+    <div class="g2" style="margin-bottom:20px;align-items:start;">
+
+      <!-- LEFT: upload -->
+      <div class="card" style="height:fit-content;">
+        <div class="card-title">
+          <div class="ct-icon" style="background:rgba(245,158,11,0.12);">📤</div>
+          Upload Dataset
+        </div>
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept=".csv" onchange="handleUpload(this)"/>
+          <div class="uz-icon">📊</div>
+          <div class="uz-title">Drop your CSV here</div>
+          <div class="uz-sub">or click to browse files</div>
+        </div>
+        <div style="margin:14px 0;text-align:center;font-size:12px;color:var(--muted);">— or —</div>
+        <button class="btn btn-ghost btn-full" onclick="genSample()">
+          🎲 Generate Sample Dataset (3,000 rows)
+        </button>
+        <div style="margin-top:16px;">
+          <div class="section-label">Required Columns</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+            <span class="col-tag">temperature</span>
+            <span class="col-tag">humidity</span>
+            <span class="col-tag">wind_speed</span>
+            <span class="col-tag">cloud_cover</span>
+            <span class="col-tag">pressure</span>
+            <span class="col-tag">visibility</span>
+            <span class="col-tag">irradiance</span>
+            <span class="col-tag target">solar_output</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: empty placeholder or stats -->
+      <div style="height:fit-content;">
+        <div id="emptyStats" class="card">
+          <div class="empty" style="padding:40px 16px;">
+            <div class="empty-icon">📋</div>
+            <p>Upload a CSV or generate sample data<br>to see dataset statistics here.</p>
+          </div>
+        </div>
+        <div id="statsCard" class="card" style="display:none;">
+          <div class="card-title">
+            <div class="ct-icon" style="background:rgba(16,185,129,0.12);">📈</div>
+            Dataset Statistics
+          </div>
+          <!-- 2 summary numbers up top -->
+          <div style="display:flex;gap:12px;margin-bottom:16px;">
+            <div class="stat-card" style="flex:1;padding:14px;">
+              <div class="stat-label">Total Rows</div>
+              <div class="stat-val" id="ds-rows" style="font-size:22px;">—</div>
+            </div>
+            <div class="stat-card" style="flex:1;padding:14px;">
+              <div class="stat-label">Features</div>
+              <div class="stat-val" style="font-size:22px;">7</div>
+            </div>
+          </div>
+          <!-- stat grid: 2 cols, all 8 features -->
+          <div id="statsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full-width preview table -->
+    <div class="card" id="previewCard" style="display:none;">
+      <div class="card-title">
+        <div class="ct-icon" style="background:rgba(99,102,241,0.12);">👁️</div>
+        Data Preview — first 6 rows
+      </div>
+      <div class="tbl-wrap" id="previewTbl"></div>
+    </div>
+
+  </div>
+
+  <!-- ════ PAGE: TRAIN ════ -->
+  <div class="page" id="page-train">
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">
+        <div class="ct-icon" style="background:rgba(245,158,11,0.12);">🧠</div>
+        Model Configuration
+      </div>
+      <p style="font-size:13px;color:var(--sub);margin-bottom:20px;line-height:1.6;">
+        Trains 5 models simultaneously with 80/20 train-test split and StandardScaler normalisation.
+        Typical training time: <strong style="color:var(--accent);">3–5 seconds.</strong>
+      </p>
+      <div class="model-grid">
+        <div class="model-card" style="--mc:#f59e0b;--mc-bg:rgba(245,158,11,0.1);">
+          <div class="mc-name" style="color:#f59e0b;">Random Forest</div>
+          <div class="mc-tag">Ensemble</div>
+          <div class="mc-metrics">
+            <div class="mc-row"><span>Trees</span><span class="mc-val">80</span></div>
+            <div class="mc-row"><span>Depth</span><span class="mc-val">10</span></div>
+          </div>
+        </div>
+        <div class="model-card" style="--mc:#6366f1;--mc-bg:rgba(99,102,241,0.1);">
+          <div class="mc-name" style="color:#6366f1;">XGBoost</div>
+          <div class="mc-tag">Hist-Gradient</div>
+          <div class="mc-metrics">
+            <div class="mc-row"><span>Iters</span><span class="mc-val">100</span></div>
+            <div class="mc-row"><span>LR</span><span class="mc-val">0.10</span></div>
+          </div>
+        </div>
+        <div class="model-card" style="--mc:#10b981;--mc-bg:rgba(16,185,129,0.1);">
+          <div class="mc-name" style="color:#10b981;">LightGBM</div>
+          <div class="mc-tag">Hist-Gradient</div>
+          <div class="mc-metrics">
+            <div class="mc-row"><span>Iters</span><span class="mc-val">100</span></div>
+            <div class="mc-row"><span>Leaves</span><span class="mc-val">31</span></div>
+          </div>
+        </div>
+        <div class="model-card" style="--mc:#8b5cf6;--mc-bg:rgba(139,92,246,0.1);">
+          <div class="mc-name" style="color:#8b5cf6;">CatBoost</div>
+          <div class="mc-tag">Extra Trees</div>
+          <div class="mc-metrics">
+            <div class="mc-row"><span>Trees</span><span class="mc-val">80</span></div>
+            <div class="mc-row"><span>Depth</span><span class="mc-val">10</span></div>
+          </div>
+        </div>
+        <div class="model-card" style="--mc:#ef4444;--mc-bg:rgba(239,68,68,0.1);">
+          <div class="mc-name" style="color:#ef4444;">ANN</div>
+          <div class="mc-tag">Neural Net</div>
+          <div class="mc-metrics">
+            <div class="mc-row"><span>Arch</span><span class="mc-val">64→32</span></div>
+            <div class="mc-row"><span>Epochs</span><span class="mc-val">80</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="trainProg"></div></div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <button class="btn btn-primary" id="trainBtn" onclick="trainModels()" style="font-size:15px;padding:14px 32px;">
+          🚀 Train All Models
+        </button>
+        <span id="trainStatus" style="font-size:13px;color:var(--muted);"></span>
+      </div>
+    </div>
+
+    <div class="card" id="quickCard" style="display:none;">
+      <div class="card-title">
+        <div class="ct-icon" style="background:rgba(16,185,129,0.12);">🏆</div>
+        Training Results
+      </div>
+      <div class="g5" id="quickResults"></div>
+    </div>
+  </div>
+
+  <!-- ════ PAGE: RESULTS ════ -->
+  <div class="page" id="page-results">
+    <div id="noResults" class="card">
+      <div class="empty"><div class="empty-icon">📊</div><p>Train models first to see results.</p></div>
+    </div>
+    <div id="resultsContent" style="display:none;">
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title"><div class="ct-icon" style="background:rgba(245,158,11,0.12);">📋</div>Model Comparison</div>
+        <div class="tbl-wrap"><table id="metricsTable"></table></div>
+      </div>
+      <div class="g2" style="margin-bottom:20px;">
+        <div class="chart-block"><div class="chart-label">RMSE by Model</div><div class="canvas-wrap" style="height:240px;"><canvas id="cRmse"></canvas></div></div>
+        <div class="chart-block"><div class="chart-label">R² Score by Model</div><div class="canvas-wrap" style="height:240px;"><canvas id="cR2"></canvas></div></div>
+      </div>
+      <div class="g2" style="margin-bottom:20px;">
+        <div class="chart-block"><div class="chart-label">MAE by Model</div><div class="canvas-wrap" style="height:240px;"><canvas id="cMae"></canvas></div></div>
+        <div class="chart-block"><div class="chart-label">R² Radar</div><div class="canvas-wrap" style="height:240px;"><canvas id="cRadar"></canvas></div></div>
+      </div>
+      <div class="chart-block" style="margin-bottom:20px;"><div class="chart-label">Actual vs Predicted — Best Model</div><div class="canvas-wrap" style="height:320px;"><canvas id="cAvpBest"></canvas></div></div>
+      <div class="chart-block" style="margin-bottom:20px;"><div class="chart-label">80-Sample Timeline</div><div class="canvas-wrap" style="height:260px;"><canvas id="cTimeline"></canvas></div></div>
+      <div class="chart-block" style="margin-bottom:20px;"><div class="chart-label">Feature Importance (Random Forest)</div><div class="canvas-wrap" style="height:280px;"><canvas id="cFI"></canvas></div></div>
+      <div class="chart-block" style="margin-bottom:20px;"><div class="chart-label">Actual vs Predicted — All 5 Models</div>
+        <div class="g2" style="gap:12px;margin-top:4px;">
+          <div class="canvas-wrap" style="height:260px;"><canvas id="cAvp0"></canvas></div>
+          <div class="canvas-wrap" style="height:260px;"><canvas id="cAvp1"></canvas></div>
+          <div class="canvas-wrap" style="height:260px;"><canvas id="cAvp2"></canvas></div>
+          <div class="canvas-wrap" style="height:260px;"><canvas id="cAvp3"></canvas></div>
+          <div class="canvas-wrap" style="height:260px;"><canvas id="cAvp4"></canvas></div>
+          <div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ PAGE: MANUAL PREDICT ════ -->
+  <div class="page" id="page-predict">
+    <div class="g2">
+      <div>
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-title">
+            <div class="ct-icon" style="background:rgba(245,158,11,0.12);">🎛️</div>
+            Weather Parameters
+          </div>
+          <div class="field">
+            <label>Model</label>
+            <select class="fw-input" id="predModel">
+              <option value="Random Forest">☀️ Random Forest</option>
+              <option value="XGBoost">⚡ XGBoost</option>
+              <option value="LightGBM">🌿 LightGBM</option>
+              <option value="CatBoost">🐱 CatBoost</option>
+              <option value="ANN">🧠 ANN — Neural Network</option>
+            </select>
+          </div>
+          <div class="divider"></div>
+          <div class="g2" style="gap:16px;">
+            <div class="field">
+              <label>🌡️ Temperature (°C)</label>
+              <div class="input-wrap"><span class="fi">🌡️</span>
+                <input type="number" id="n_temp" value="25" step="0.1" min="-10" max="60" oninput="syncRange('n_temp','r_temp')"/>
+              </div>
+              <div class="range-row"><input type="range" id="r_temp" min="-10" max="60" value="25" step="0.5" oninput="syncNum('r_temp','n_temp')"/></div>
+            </div>
+            <div class="field">
+              <label>💧 Humidity (%)</label>
+              <div class="input-wrap"><span class="fi">💧</span>
+                <input type="number" id="n_hum" value="50" step="1" min="0" max="100" oninput="syncRange('n_hum','r_hum')"/>
+              </div>
+              <div class="range-row"><input type="range" id="r_hum" min="0" max="100" value="50" step="1" oninput="syncNum('r_hum','n_hum')"/></div>
+            </div>
+            <div class="field">
+              <label>💨 Wind Speed (m/s)</label>
+              <div class="input-wrap"><span class="fi">💨</span>
+                <input type="number" id="n_wind" value="5" step="0.1" min="0" max="30" oninput="syncRange('n_wind','r_wind')"/>
+              </div>
+              <div class="range-row"><input type="range" id="r_wind" min="0" max="30" value="5" step="0.5" oninput="syncNum('r_wind','n_wind')"/></div>
+            </div>
+            <div class="field">
+              <label>☁️ Cloud Cover (%)</label>
+              <div class="input-wrap"><span class="fi">☁️</span>
+                <input type="number" id="n_cloud" value="20" step="1" min="0" max="100" oninput="syncRange('n_cloud','r_cloud')"/>
+              </div>
+              <div class="range-row"><input type="range" id="r_cloud" min="0" max="100" value="20" step="1" oninput="syncNum('r_cloud','n_cloud')"/></div>
+            </div>
+            <div class="field">
+              <label>🔵 Pressure (hPa)</label>
+              <div class="input-wrap"><span class="fi">🔵</span>
+                <input type="number" id="n_press" value="1013" step="0.5" min="940" max="1060" oninput="syncRange('n_press','r_press')"/>
+              </div>
+              <div class="range-row"><input type="range" id="r_press" min="940" max="1060" value="1013" step="0.5" oninput="syncNum('r_press','n_press')"/></div>
+            </div>
+            <div class="field">
+              <label>👁️ Visibility (km)</label>
+              <div class="input-wrap"><span class="fi">👁️</span>
+                <input type="number" id="n_vis" value="10" step="0.1" min="0" max="30" oninput="syncRange('n_vis','r_vis')"/>
+              </div>
+              <div class="range-row"><input type="range" id="r_vis" min="0" max="30" value="10" step="0.5" oninput="syncNum('r_vis','n_vis')"/></div>
+            </div>
+          </div>
+          <div class="field">
+            <label>☀️ Irradiance (W/m²)</label>
+            <div class="input-wrap"><span class="fi">☀️</span>
+              <input type="number" id="n_irr" value="600" step="5" min="0" max="1200" oninput="syncRange('n_irr','r_irr')"/>
+            </div>
+            <div class="range-row"><input type="range" id="r_irr" min="0" max="1200" value="600" step="5" oninput="syncNum('r_irr','n_irr')"/></div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-primary btn-full" onclick="runPredict()" style="padding:14px;">⚡ Predict Solar Output</button>
+            <button class="btn btn-ghost btn-sm" onclick="randomInputs()">🎲 Random</button>
+            <button class="btn btn-ghost btn-sm" onclick="resetInputs()">↺ Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div id="predEmpty" class="card" style="margin-bottom:20px;">
+          <div class="empty"><div class="empty-icon">⚡</div><p>Adjust parameters and click <strong>Predict Solar Output</strong>.</p></div>
+        </div>
+        <div id="predLoading" style="display:none;margin-bottom:20px;">
+          <div class="card">
+            <div style="display:flex;flex-direction:column;align-items:center;padding:36px 24px;gap:16px;">
+              <div class="pred-spinner"></div>
+              <div style="font-size:14px;font-weight:600;color:var(--sub);">Running prediction…</div>
+              <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;" id="loadingModelName"></div>
+            </div>
+          </div>
+        </div>
+        <div id="predResult" style="display:none;margin-bottom:20px;">
+          <div class="card">
+            <div class="card-title">
+              <div class="ct-icon" style="background:rgba(245,158,11,0.12);">⚡</div>
+              Predicted Output
+            </div>
+            <div class="pred-hero">
+              <div class="pred-num" id="predNum">—</div>
+              <div class="pred-unit">kilowatt-hours (kWh)</div>
+              <div class="pred-tag" id="predTag"></div>
+            </div>
+          </div>
+        </div>
+        <div id="allModelResult" style="display:none;">
+          <div class="card">
+            <div class="card-title">
+              <div class="ct-icon" style="background:rgba(99,102,241,0.12);">📊</div>
+              All Models Comparison
+            </div>
+            <div id="allModelBars"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ PAGE: BATCH ════ -->
+  <div class="page" id="page-batch">
+    <div class="g2">
+      <div class="card">
+        <div class="card-title">
+          <div class="ct-icon" style="background:rgba(99,102,241,0.12);">📋</div>
+          Batch CSV Prediction
+        </div>
+        <p style="font-size:13px;color:var(--sub);margin-bottom:20px;line-height:1.6;">
+          Upload a CSV with the 7 feature columns. The app will run all trained models and return predictions per row.
+        </p>
+        <div class="upload-zone" id="batchZone">
+          <input type="file" id="batchFile" accept=".csv" onchange="runBatch(this)"/>
+          <div class="uz-icon">📋</div>
+          <div class="uz-title">Upload CSV for batch prediction</div>
+          <div class="uz-sub">Same columns as training (without solar_output)</div>
+        </div>
+      </div>
+      <div class="card" id="batchEmpty">
+        <div class="empty"><div class="empty-icon">📋</div><p>Upload a CSV to run batch predictions across all models.</p></div>
+      </div>
+    </div>
+    <div class="card" id="batchResult" style="display:none;margin-top:20px;">
+      <div class="card-title">
+        <div class="ct-icon" style="background:rgba(16,185,129,0.12);">✅</div>
+        Batch Results Preview
+      </div>
+      <div class="tbl-wrap" id="batchTbl"></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ── Theme ────────────────────────────────────────────────────────────────────
+const saved = localStorage.getItem("solarml_theme") || "light";
+applyTheme(saved);
+
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute("data-theme");
+  const next = cur === "light" ? "dark" : "light";
+  localStorage.setItem("solarml_theme", next);
+  applyTheme(next);
+}
+function applyTheme(t){
+  document.documentElement.setAttribute("data-theme", t);
+  document.getElementById("themeIcon").textContent = t==="dark" ? "☀️" : "🌙";
+  document.getElementById("themeLabel").textContent = t==="dark" ? "Light Mode" : "Dark Mode";
+}
+
+// ── User avatar ──────────────────────────────────────────────────────────────
+const uname = "{{ user }}";
+document.getElementById("userAvatar").textContent = uname.charAt(0).toUpperCase();
+document.getElementById("userName").textContent = uname;
+
+// ── Navigation ───────────────────────────────────────────────────────────────
+const PAGE_META = {
+  data:    ["Dataset", "Upload or generate training data"],
+  train:   ["Train Models", "Configure and train all 5 ML models"],
+  results: ["Results & Charts", "Compare model performance metrics"],
+  predict: ["Manual Prediction", "Enter weather values to predict solar output"],
+  batch:   ["Batch Prediction", "Upload CSV for bulk predictions"],
+};
+
+function showPage(p){
+  document.querySelectorAll(".page").forEach(el=>el.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(el=>el.classList.remove("active"));
+  document.getElementById("page-"+p).classList.add("active");
+  document.getElementById("nav-"+p).classList.add("active");
+  const m = PAGE_META[p];
+  document.getElementById("pageTitle").textContent = m[0];
+  document.getElementById("pageSub").textContent = m[1];
+}
+
+// ── Toast ────────────────────────────────────────────────────────────────────
+function toast(msg, type="ok"){
+  const el = document.getElementById("toast");
+  el.textContent = (type==="ok"?"✅ ":"❌ ") + msg;
+  el.className = "toast show " + type;
+  setTimeout(()=>el.className="toast", 3500);
+}
+
+// ── Loading ──────────────────────────────────────────────────────────────────
+function showLoad(t="", s=""){ 
+  document.getElementById("ovTitle").textContent=t;
+  document.getElementById("ovSub").textContent=s;
+  document.getElementById("overlay").classList.add("show");
+}
+function hideLoad(){ document.getElementById("overlay").classList.remove("show"); }
+
+// ── Dataset ──────────────────────────────────────────────────────────────────
+function handleUpload(input){
+  const f=input.files[0]; if(!f) return;
+  showLoad("Reading dataset…", "Parsing CSV file");
+  const fd=new FormData(); fd.append("file",f);
+  fetch("/api/upload",{method:"POST",body:fd})
+    .then(r=>r.json()).then(d=>{
+      hideLoad();
+      if(d.error){toast(d.error,"err");return;}
+      renderDataInfo(d); toast(`${d.rows.toLocaleString()} rows loaded`);
+    }).catch(()=>{hideLoad();toast("Upload failed","err");});
+}
+
+function genSample(){
+  showLoad("Generating dataset…","Creating 2,000 synthetic samples");
+  fetch("/api/generate_sample",{method:"POST"})
+    .then(r=>r.json()).then(d=>{
+      hideLoad();
+      if(d.error){toast(d.error,"err");return;}
+      renderDataInfo(d); toast("Sample dataset ready — 2,000 rows");
+    }).catch(()=>{hideLoad();toast("Failed","err");});
+}
+
+function renderDataInfo(d){
+  document.getElementById("emptyStats").style.display="none";
+  document.getElementById("statsCard").style.display="block";
+  // row count
+  if(document.getElementById("ds-rows")) document.getElementById("ds-rows").textContent = d.rows.toLocaleString();
+
+  const keys   = ["temperature","humidity","wind_speed","cloud_cover","pressure","visibility","irradiance","solar_output"];
+  const icons  = ["🌡️","💧","💨","☁️","🔵","👁️","☀️","⚡"];
+  const colors = ["#f59e0b","#6366f1","#10b981","#8b5cf6","#ef4444","#06b6d4","#f97316","#14b8a6"];
+
+  document.getElementById("statsGrid").innerHTML = keys.map((k,i) => {
+    const s = d.stats[k] || {};
+    return `<div class="stat-card" style="padding:12px;border-left:3px solid ${colors[i]};">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div class="stat-label" style="font-size:10px;">${k.replace(/_/g," ")}</div>
+        <span style="font-size:13px;">${icons[i]}</span>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:var(--text);">${(s.mean||0).toFixed(1)}</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:3px;">
+        min ${(s.min||0).toFixed(1)} &nbsp;·&nbsp; max ${(s.max||0).toFixed(1)}
+      </div>
+    </div>`;
+  }).join("");
+
+  if(d.preview && d.preview.length > 0){
+    const cols = Object.keys(d.preview[0]);
+    document.getElementById("previewTbl").innerHTML = `<table>
+      <thead><tr>${cols.map(col=>`<th>${col}</th>`).join("")}</tr></thead>
+      <tbody>${d.preview.map(row=>`<tr>${cols.map(col=>{
+        const v = row[col];
+        return `<td>${typeof v==="number" ? v.toFixed(2) : (v ?? "")}</td>`;
+      }).join("")}</tr>`).join("")}</tbody>
+    </table>`;
+    document.getElementById("previewCard").style.display="block";
+  }
+}
+
+// Drag & drop
+const uz=document.getElementById("uploadZone");
+uz.addEventListener("dragover",e=>{e.preventDefault();uz.classList.add("drag-over");});
+uz.addEventListener("dragleave",()=>uz.classList.remove("drag-over"));
+uz.addEventListener("drop",e=>{
+  e.preventDefault();uz.classList.remove("drag-over");
+  const f=e.dataTransfer.files[0];
+  if(f){const dt=new DataTransfer();dt.items.add(f);
+    const inp=document.getElementById("fileInput");inp.files=dt.files;handleUpload(inp);}
+});
+
+// ── Train ────────────────────────────────────────────────────────────────────
+const MC={
+  "Random Forest":"#f59e0b","XGBoost":"#6366f1",
+  "LightGBM":"#10b981","CatBoost":"#8b5cf6","ANN":"#ef4444"
+};
+let trainedResults = null;
+
+function trainModels(){
+  const btn=document.getElementById("trainBtn");
+  btn.disabled=true;
+  document.getElementById("trainStatus").textContent="Training in progress…";
+  showLoad("Training 5 ML models…","Random Forest · XGBoost · LightGBM · CatBoost · ANN");
+  let p=0; const iv=setInterval(()=>{p=Math.min(p+3,88);
+    document.getElementById("trainProg").style.width=p+"%";},200);
+  const dark = document.documentElement.getAttribute("data-theme")==="dark";
+  fetch("/api/train",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({dark})})
+    .then(r=>r.json()).then(d=>{
+      clearInterval(iv);document.getElementById("trainProg").style.width="100%";
+      btn.disabled=false;hideLoad();
+      if(d.error){toast(d.error,"err");document.getElementById("trainStatus").textContent="Failed";return;}
+      trainedResults=d;
+      document.getElementById("trainStatus").textContent=
+        `✅ Done · best: ${d.best} (R²=${d.results[d.best].r2}) · ${d.n_test} test samples`;
+      document.getElementById("statusDot").classList.add("on");
+      document.getElementById("statusText").textContent=`Trained · Best: ${d.best}`;
+      renderQuick(d);renderResults(d);
+      toast("All 5 models trained 🎉");
+    }).catch(e=>{clearInterval(iv);btn.disabled=false;hideLoad();toast("Training failed","err");});
+}
+
+function renderQuick(d){
+  document.getElementById("quickCard").style.display="block";
+  document.getElementById("quickResults").innerHTML=Object.entries(d.results)
+    .map(([n,m])=>`
+    <div class="stat-card" style="text-align:center;border-color:${MC[n]}22;${n===d.best?"box-shadow:0 0 0 2px "+MC[n]+"40;":""}">
+      <div style="font-size:13px;font-weight:800;color:${MC[n]};margin-bottom:6px;">${n}${n===d.best?" 🏆":""}</div>
+      <div class="mc-metrics">
+        <div class="mc-row"><span>R²</span><span class="mc-val" style="color:${MC[n]}">${m.r2}</span></div>
+        <div class="mc-row"><span>RMSE</span><span class="mc-val">${m.rmse}</span></div>
+        <div class="mc-row"><span>MAE</span><span class="mc-val">${m.mae}</span></div>
+        <div class="mc-row"><span>Time</span><span class="mc-val">${m.time}s</span></div>
+      </div>
+    </div>`).join("");
+}
+
+// ── Chart registry ───────────────────────────────────────────────────────────
+const _charts = {};
+function mkChart(id, cfg){
+  if(_charts[id]) _charts[id].destroy();
+  const ctx = document.getElementById(id);
+  if(!ctx) return;
+  // Force every chart to respect container height, never grow on its own
+  if(!cfg.options) cfg.options = {};
+  cfg.options.responsive = true;
+  cfg.options.maintainAspectRatio = false;
+  _charts[id] = new Chart(ctx, cfg);
+}
+function isDark(){ return document.documentElement.getAttribute("data-theme")==="dark"; }
+function gridColor(){ return isDark() ? "#1c2d42" : "#e2e8f0"; }
+function tickColor(){ return isDark() ? "#64748b" : "#94a3b8"; }
+function textColor(){ return isDark() ? "#f1f5f9" : "#1e293b"; }
+
+function renderResults(d){
+  document.getElementById("noResults").style.display="none";
+  document.getElementById("resultsContent").style.display="block";
+
+  const MODEL_NAMES = ["Random Forest","XGBoost","LightGBM","CatBoost","ANN"];
+  const names = Object.keys(d.results).sort((a,b)=>d.results[b].r2-d.results[a].r2);
+
+  // ── Table
+  document.getElementById("metricsTable").innerHTML=`
+    <thead><tr><th>Model</th><th>RMSE</th><th>MAE</th><th>R²</th><th>Time</th><th>Rank</th></tr></thead>
+    <tbody>${names.map((n,i)=>`<tr>
+      <td style="color:${MC[n]};font-weight:700;">${n}${n===d.best?" 🏆":""}</td>
+      <td>${d.results[n].rmse}</td><td>${d.results[n].mae}</td>
+      <td style="color:${d.results[n].r2>0.9?"var(--green)":d.results[n].r2>0.7?"var(--accent)":"var(--red)"};font-weight:700;">${d.results[n].r2}</td>
+      <td>${d.results[n].time}s</td>
+      <td style="color:${i===0?"var(--accent)":"var(--muted)"};font-weight:700;">#${i+1}</td>
+    </tr>`).join("")}</tbody>`;
+
+  const gc=gridColor(), tc=tickColor(), txtc=textColor();
+  const barDefaults = {
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{ticks:{color:tc,font:{size:11}},grid:{color:gc}},
+      y:{ticks:{color:tc,font:{size:10}},grid:{color:gc}}
+    }
+  };
+
+  // ── RMSE bar
+  mkChart("cRmse",{type:"bar",data:{
+    labels:MODEL_NAMES,
+    datasets:[{data:MODEL_NAMES.map(n=>d.results[n].rmse),
+      backgroundColor:MODEL_NAMES.map(n=>MC[n]+"cc"),
+      borderColor:MODEL_NAMES.map(n=>MC[n]),borderWidth:1,borderRadius:6}]
+  },options:{...barDefaults,plugins:{...barDefaults.plugins,
+    tooltip:{callbacks:{label:ctx=>`RMSE: ${ctx.parsed.y}`}}}}});
+
+  // ── R² bar
+  mkChart("cR2",{type:"bar",data:{
+    labels:MODEL_NAMES,
+    datasets:[{data:MODEL_NAMES.map(n=>d.results[n].r2),
+      backgroundColor:MODEL_NAMES.map(n=>MC[n]+"cc"),
+      borderColor:MODEL_NAMES.map(n=>MC[n]),borderWidth:1,borderRadius:6}]
+  },options:{...barDefaults,scales:{...barDefaults.scales,y:{...barDefaults.scales.y,min:0,max:1}},
+    plugins:{...barDefaults.plugins,tooltip:{callbacks:{label:ctx=>`R²: ${ctx.parsed.y}`}}}}});
+
+  // ── MAE bar
+  mkChart("cMae",{type:"bar",data:{
+    labels:MODEL_NAMES,
+    datasets:[{data:MODEL_NAMES.map(n=>d.results[n].mae),
+      backgroundColor:MODEL_NAMES.map(n=>MC[n]+"99"),
+      borderColor:MODEL_NAMES.map(n=>MC[n]),borderWidth:1,borderRadius:6}]
+  },options:{...barDefaults,plugins:{...barDefaults.plugins,
+    tooltip:{callbacks:{label:ctx=>`MAE: ${ctx.parsed.y}`}}}}});
+
+  // ── Radar
+  mkChart("cRadar",{type:"radar",data:{
+    labels:MODEL_NAMES,
+    datasets:[{label:"R²",data:MODEL_NAMES.map(n=>Math.max(0,d.results[n].r2)),
+      backgroundColor:"rgba(245,158,11,0.15)",borderColor:"#f59e0b",
+      pointBackgroundColor:"#f59e0b",pointRadius:4,borderWidth:2}]
+  },options:{scales:{r:{min:0,max:1,ticks:{color:tc,font:{size:9},backdropColor:"transparent"},
+    grid:{color:gc},pointLabels:{color:txtc,font:{size:11}}}},
+    plugins:{legend:{display:false}}}});
+
+  // ── Best model Actual vs Predicted scatter
+  const bcd = d.chart_data[d.best];
+  mkChart("cAvpBest",{type:"scatter",data:{
+    datasets:[
+      {label:"Predictions",data:bcd.actual.map((a,i)=>({x:a,y:bcd.predicted[i]})),
+        backgroundColor:MC[d.best]+"77",pointRadius:4,pointHoverRadius:6},
+      {label:"Perfect fit",data:(()=>{const mn=Math.min(...bcd.actual),mx=Math.max(...bcd.actual);return [{x:mn,y:mn},{x:mx,y:mx}];})(),
+        type:"line",borderColor:isDark()?"#475569":"#94a3b8",borderDash:[5,4],
+        borderWidth:1.5,pointRadius:0,showLine:true}
+    ]
+  },options:{plugins:{legend:{labels:{color:txtc,font:{size:11}}}},
+    scales:{
+      x:{title:{display:true,text:"Actual (kWh)",color:tc},ticks:{color:tc},grid:{color:gc}},
+      y:{title:{display:true,text:"Predicted (kWh)",color:tc},ticks:{color:tc},grid:{color:gc}}
+    }}});
+
+  // ── 80-sample timeline
+  const labels=Array.from({length:d.y_test_sample.length},(_,i)=>i+1);
+  mkChart("cTimeline",{type:"line",data:{
+    labels,
+    datasets:[
+      {label:"Actual",data:d.y_test_sample,borderColor:isDark()?"#94a3b8":"#475569",
+        borderWidth:2,pointRadius:0,tension:0.3},
+      ...MODEL_NAMES.map(n=>({label:n,data:d.preds_sample[n],
+        borderColor:MC[n],borderWidth:1.5,pointRadius:0,tension:0.3,borderDash:[4,3]}))
+    ]
+  },options:{plugins:{legend:{labels:{color:txtc,font:{size:10},boxWidth:12}}},
+    scales:{
+      x:{ticks:{color:tc,maxTicksLimit:10},grid:{color:gc}},
+      y:{title:{display:true,text:"kWh",color:tc},ticks:{color:tc},grid:{color:gc}}
+    }}});
+
+  // ── Feature importance horizontal bar
+  const fiPairs=d.features.map((f,i)=>({f,v:d.feature_importance[i]}))
+    .sort((a,b)=>a.v-b.v);
+  mkChart("cFI",{type:"bar",data:{
+    labels:fiPairs.map(p=>p.f),
+    datasets:[{data:fiPairs.map(p=>p.v),
+      backgroundColor:fiPairs.map(p=>`rgba(245,${Math.round(100+p.v*600)},11,0.75)`),
+      borderRadius:5,borderWidth:0}]
+  },options:{indexAxis:"y",plugins:{legend:{display:false}},
+    scales:{
+      x:{ticks:{color:tc},grid:{color:gc}},
+      y:{ticks:{color:txtc,font:{size:11}},grid:{display:false}}
+    }}});
+
+  // ── Per-model scatter subplots
+  MODEL_NAMES.forEach((name,i)=>{
+    const cd=d.chart_data[name];
+    mkChart(`cAvp${i}`,{type:"scatter",data:{
+      datasets:[
+        {label:name,data:cd.actual.map((a,j)=>({x:a,y:cd.predicted[j]})),
+          backgroundColor:MC[name]+"66",pointRadius:3},
+        {label:"Ideal",data:(()=>{const mn=Math.min(...cd.actual),mx=Math.max(...cd.actual);return [{x:mn,y:mn},{x:mx,y:mx}];})(),
+          type:"line",borderColor:isDark()?"#334155":"#cbd5e1",borderDash:[4,3],
+          borderWidth:1,pointRadius:0,showLine:true}
+      ]
+    },options:{plugins:{legend:{labels:{color:txtc,font:{size:10},boxWidth:10}},
+      title:{display:true,text:name,color:MC[name],font:{size:12,weight:"bold"}}},
+      scales:{
+        x:{title:{display:true,text:"Actual",color:tc,font:{size:9}},ticks:{color:tc,font:{size:8}},grid:{color:gc}},
+        y:{title:{display:true,text:"Predicted",color:tc,font:{size:9}},ticks:{color:tc,font:{size:8}},grid:{color:gc}}
+      }}});
+  });
+}
+
+// ── Predict ──────────────────────────────────────────────────────────────────
+function syncRange(nid,rid){ document.getElementById(rid).value=document.getElementById(nid).value; }
+function syncNum(rid,nid){ document.getElementById(nid).value=document.getElementById(rid).value; }
+
+function getVals(){
+  return {
+    temperature:+document.getElementById("n_temp").value,
+    humidity:+document.getElementById("n_hum").value,
+    wind_speed:+document.getElementById("n_wind").value,
+    cloud_cover:+document.getElementById("n_cloud").value,
+    pressure:+document.getElementById("n_press").value,
+    visibility:+document.getElementById("n_vis").value,
+    irradiance:+document.getElementById("n_irr").value,
+    model:document.getElementById("predModel").value
+  };
+}
+
+async function runPredict(){
+  const data=getVals();
+  // show loading
+  document.getElementById("predEmpty").style.display="none";
+  document.getElementById("predResult").style.display="none";
+  document.getElementById("allModelResult").style.display="none";
+  document.getElementById("predLoading").style.display="block";
+  document.getElementById("loadingModelName").textContent=data.model;
+  try{
+    const r=await fetch("/api/predict",{method:"POST",
+      headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
+    const d=await r.json();
+    document.getElementById("predLoading").style.display="none";
+    if(d.error){toast(d.error,"err");document.getElementById("predEmpty").style.display="block";return;}
+    // animate number counting up
+    document.getElementById("predResult").style.display="block";
+    document.getElementById("predTag").textContent=d.model;
+    animateNumber("predNum", d.prediction, 900);
+    runAllModels(data);
+  }catch(e){
+    document.getElementById("predLoading").style.display="none";
+    document.getElementById("predEmpty").style.display="block";
+    toast("Prediction failed","err");
+  }
+}
+
+function animateNumber(id, target, duration){
+  const el=document.getElementById(id);
+  const start=performance.now();
+  const from=0;
+  function step(now){
+    const p=Math.min((now-start)/duration,1);
+    // ease out cubic
+    const ease=1-Math.pow(1-p,3);
+    el.textContent=(from+(target-from)*ease).toFixed(2);
+    if(p<1) requestAnimationFrame(step);
+    else el.textContent=target.toFixed(2);
+  }
+  requestAnimationFrame(step);
+}
+
+async function runAllModels(base){
+  const models=["Random Forest","XGBoost","LightGBM","CatBoost","ANN"];
+  const res=await Promise.all(models.map(m=>
+    fetch("/api/predict",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({...base,model:m})}).then(r=>r.json())));
+  const maxV=Math.max(...res.map(r=>r.prediction||0))||1;
+  document.getElementById("allModelResult").style.display="block";
+  document.getElementById("allModelBars").innerHTML=res.map((r,i)=>`
+    <div class="model-pred-row">
+      <div class="mpr-top">
+        <span class="mpr-name" style="color:${MC[models[i]]}">${models[i]}</span>
+        <span class="mpr-val">${r.error?"N/A":(r.prediction.toFixed(2)+" kWh")}</span>
+      </div>
+      ${r.error?"":`<div class="mpr-bar"><div class="mpr-fill" style="width:${(r.prediction/maxV*100).toFixed(1)}%;background:${MC[models[i]]};"></div></div>`}
+    </div>`).join("");
+}
+
+function randomInputs(){
+  const r=(a,b)=>+(Math.random()*(b-a)+a).toFixed(1);
+  [["n_temp","r_temp",-5,45],["n_hum","r_hum",10,95],["n_wind","r_wind",0,15],
+   ["n_cloud","r_cloud",0,100],["n_press","r_press",985,1040],
+   ["n_vis","r_vis",1,20],["n_irr","r_irr",0,1100]].forEach(([n,rng,a,b])=>{
+    const v=r(a,b);
+    document.getElementById(n).value=v;document.getElementById(rng).value=v;
+  });
+}
+function resetInputs(){
+  const def={n_temp:25,r_temp:25,n_hum:50,r_hum:50,n_wind:5,r_wind:5,
+    n_cloud:20,r_cloud:20,n_press:1013,r_press:1013,n_vis:10,r_vis:10,n_irr:600,r_irr:600};
+  Object.entries(def).forEach(([id,v])=>document.getElementById(id).value=v);
+}
+
+// ── Batch ────────────────────────────────────────────────────────────────────
+function runBatch(input){
+  const f=input.files[0];if(!f)return;
+  showLoad("Running batch prediction…","Processing all rows");
+  const fd=new FormData();fd.append("file",f);
+  fetch("/api/batch_predict",{method:"POST",body:fd})
+    .then(r=>r.json()).then(d=>{
+      hideLoad();
+      if(d.error){toast(d.error,"err");return;}
+      document.getElementById("batchEmpty").style.display="none";
+      document.getElementById("batchResult").style.display="block";
+      const cols=Object.keys(d.preview[0]);
+      document.getElementById("batchTbl").innerHTML=`<table>
+        <thead><tr>${cols.map(c=>`<th>${c}</th>`).join("")}</tr></thead>
+        <tbody>${d.preview.map(row=>`<tr>${cols.map(c=>`<td>${typeof row[c]==="number"?row[c].toFixed(2):row[c]}</td>`).join("")}</tr>`).join("")}</tbody>
+      </table>`;
+      toast(`${d.rows} rows processed across ${d.models.length} models`);
+    }).catch(()=>{hideLoad();toast("Batch failed","err");});
+}
+</script>
+</body>
+</html>
